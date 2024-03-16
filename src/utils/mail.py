@@ -12,12 +12,12 @@ mail_prefix: str = ""
 
 
 class Mail():
-    currentMailUsername: str = None
-    currentActivateLink: str = None
+    current_username: str = None
+    current_activate_link: str = None
     
 
     def get_current_email(self) -> str:
-        return self.currentMailUsername + MAIL_DOMAIN
+        return self.current_username + MAIL_DOMAIN
 
     
     def generate(self) -> str:
@@ -28,5 +28,21 @@ class Mail():
         return _new
     
 
+    def request(self, index: int = None) -> str:
+        url = f"https://mailforspam.com/mail/{self.current_username}/{index if index is not None else ''}"
+        logger.debug("Sending request to " + url)
+        resp: requests.Response = requests.get()
+        logger.debug(f"Request completed. Code: {resp.status_code}")
+        if resp.status_code != 200: raise requests.exceptions.HTTPError("Failed to get request response data.")
+        return resp.text
+    
+
     def get_activate_link(self) -> str:
+        pass
+
+
+def parse_mail_list(mail_obj: Mail):
+    data = mail_obj.request()
+    parser = bs4.BeautifulSoup(data)
+    for element in parser.select("a"):
         pass
